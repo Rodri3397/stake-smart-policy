@@ -1,0 +1,351 @@
+<!-- Chosen Palette: Neutra-Calma (Fundo: Branco/Bege Suave #F7F5F0; Primária: Azul Marinho #1B4E8C; Acento: Verde Menta Suave #A3E635) -->
+<!-- Application Structure Plan: Dashboard temático (Arquitetura da Informação). A estrutura foi escolhida para evitar a leitura linear de um documento legal. O usuário é guiado por três seções principais interativas: 1. Mapa de Dados Coletados (Visão Geral da Seção 1): Apresenta o tipo de dado, finalidade e quem coleta, de forma visual e filtrável. 2. Framework Legal (Visão Geral da Seção 2): Explica a base legal (LGPD) e os direitos do usuário com toggles interativos. 3. O Ecossistema de Terceiros (Visão Geral da Seção 1b): Detalha os serviços de terceiros e suas funções. Esta abordagem permite ao usuário "explodir" o texto da política em componentes interativos, focando no que é mais relevante (quais dados são meus?). -->
+<!-- Visualization & Content Choices:
+1. Dados Coletados:
+   - Report Info: Tabela da Seção 1a (Dados Automáticos).
+   - Goal: Informar e Organizar.
+   - Viz/Presentation Method: Tabela Interativa e Donut Chart (Chart.js) para mostrar a proporção de coleta (Implícito: Uso vs. Logs vs. Publicidade).
+   - Interaction: Filtro (Dropdown) para selecionar o Tipo de Dado.
+   - Justification: Tabela facilita a comparação e o Donut Chart oferece uma visão rápida do foco da coleta.
+   - Library/Method: Chart.js, Vanilla JS para manipulação da tabela e do filtro.
+2. Base Legal:
+   - Report Info: Seção 2 (Base Legal) e Seção 4 (Direitos).
+   - Goal: Informar e Organizar.
+   - Viz/Presentation Method: Painéis Expansíveis (Acordeão) com ícones.
+   - Interaction: Click para expandir/recolher detalhes legais.
+   - Justification: Reduz a carga cognitiva, mostrando o resumo do texto legal apenas quando o usuário deseja o detalhe.
+   - Library/Method: Vanilla JS.
+3. Terceiros:
+   - Report Info: Tabela da Seção 1b (Terceiros).
+   - Goal: Informar e Organizar.
+   - Viz/Presentation Method: Cards de Serviço com texto contextual.
+   - Interaction: Click/Hover para realçar a finalidade do serviço.
+   - Justification: Mais visual que uma tabela para destacar as entidades externas.
+   - Library/Method: Vanilla JS, Tailwind.
+CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparência de Dados: Stake Smart EV Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .text-clip-fade {
+            position: relative;
+            max-height: 4.5em; /* 3 lines of text */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .text-clip-fade.expanded {
+            max-height: 500px; /* arbitrary large value */
+        }
+        .text-clip-fade::after {
+            content: '...';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(to right, rgba(247, 245, 240, 0), #F7F5F0 50%);
+            padding-left: 10px;
+            pointer-events: none;
+        }
+        .text-clip-fade.expanded::after {
+            content: none;
+        }
+    </style>
+</head>
+<body class="bg-[#F7F5F0] min-h-screen text-[#1B4E8C] font-sans">
+    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <!-- CABEÇALHO E VISÃO GERAL -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1B4E8C] mb-2">Transparência de Dados</h1>
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-600 mb-4">Política de Privacidade Interativa – Stake Smart EV Calculator</h2>
+            <p class="text-sm text-gray-500">Última atualização: 23 de Outubro de 2025 | Operado por RL Products and Services</p>
+        </header>
+
+        <!-- INTRODUÇÃO E ARQUITETURA DA INFORMAÇÃO -->
+        <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-12">
+            <h3 class="text-2xl font-bold mb-4 border-b-2 border-[#A3E635] pb-2">O Que Você Precisa Saber</h3>
+            <p class="text-gray-700 leading-relaxed">Esta aplicação interativa traduz os termos legais da Política de Privacidade do *Stake Smart EV Calculator* em um formato simples e acessível. Nossa prioridade é a transparência sobre como o App coleta e utiliza informações para fins de publicidade e melhoria do serviço. Você pode explorar a coleta de dados, o ecossistema de terceiros e seus direitos legais nas seções abaixo.</p>
+        </section>
+
+        <!-- SEÇÃO 1: MAPEAMENTO DE DADOS COLETADOS (Análise da Seção 1a e 1c) -->
+        <section id="dados-coletados" class="mb-12">
+            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">1. Mapa de Dados Coletados e Propósito</h3>
+            <p class="text-gray-700 mb-8">Esta seção detalha as informações que são coletadas automaticamente pelo App (Seção 1.a) e confirma que o App **NÃO** coleta dados de identificação direta (Seção 1.c), como seu nome ou e-mail, protegendo sua privacidade.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- VISUALIZAÇÃO: Gráfico de Proporção de Coleta -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
+                    <h4 class="font-semibold text-lg mb-4 text-[#1B4E8C]">Foco da Coleta (Proporção Implícita)</h4>
+                    <div class="chart-container">
+                        <canvas id="coletaChart"></canvas>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4 text-center">Gráfico estimativo do foco da coleta de dados automáticos, com base nas categorias descritas na política.</p>
+                </div>
+
+                <!-- TABELA INTERATIVA DE DADOS -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                    <h4 class="font-semibold text-lg mb-4 text-[#1B4E8C]">Detalhes dos Dados Coletados Automaticamente</h4>
+                    <div class="mb-4 flex items-center space-x-4">
+                        <label for="filtroDado" class="text-sm font-medium text-gray-700">Filtrar por Finalidade:</label>
+                        <select id="filtroDado" class="mt-1 block w-full sm:w-auto p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#A3E635] focus:border-[#A3E635] bg-gray-50">
+                            <option value="todos">Mostrar Todos</option>
+                            <option value="publicidade">Publicidade e Marketing</option>
+                            <option value="otimizacao">Segurança e Otimização</option>
+                            <option value="diagnostico">Diagnóstico e Melhoria</option>
+                        </select>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Dado</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finalidade Principal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaDados" class="bg-white divide-y divide-gray-200">
+                                <!-- Conteúdo inserido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: O ECÓSSISTEMA DE TERCEIROS (Análise da Seção 1b) -->
+        <section id="terceiros" class="mb-12">
+            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">2. Serviços de Terceiros Envolvidos</h3>
+            <p class="text-gray-700 mb-8">O App utiliza serviços de terceiros, essenciais para a funcionalidade (Google Play Services) ou para monetização e qualidade (AdMob, Firebase). Estes serviços têm suas próprias políticas de privacidade e são responsáveis pela gestão desses dados.</p>
+
+            <div id="cardsTerceiros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Cards inseridos via JS -->
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: DIREITOS E BASE LEGAL (Análise da Seção 2 e 4) -->
+        <section id="base-legal" class="mb-12">
+            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">3. Seus Direitos e Fundamentos Legais</h3>
+            <p class="text-gray-700 mb-8">Esta seção explica o fundamento legal (LGPD) que permite o processamento dos dados e detalha seus direitos como titular dos dados, promovendo o entendimento e o controle sobre suas informações.</p>
+
+            <div id="acordeao" class="space-y-4">
+                <!-- Painéis Expansíveis (Acordeão) para LGPD e Direitos -->
+            </div>
+        </section>
+
+        <!-- SEÇÃO 4: INFORMAÇÕES GERAIS E CONTATO (Seção 5 e 6) -->
+        <section id="contato" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
+            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">Informações Gerais e Contato</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="font-semibold text-lg mb-2 text-[#1B4E8C]">Privacidade de Crianças (Seção 5)</h4>
+                    <p class="text-gray-700">Nosso Serviço **não se destina a menores de 13 anos**. Não coletamos intencionalmente informações de identificação pessoal de crianças abaixo desta idade.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-lg mb-2 text-[#1B4E8C]">Fale Conosco (Seção 6)</h4>
+                    <p class="text-gray-700 mb-2">Para exercer seus direitos (Seção 4), tirar dúvidas ou solicitar informações sobre esta política, utilize o e-mail de contato:</p>
+                    <p class="text-lg font-bold text-[#A3E635] break-all">📧 buscadores999@gmail.com</p>
+                    <p class="text-sm text-gray-500 mt-2">Responsável: RL Products and Services</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const dadosColetados = [
+            { tipo: 'Identificador de Publicidade (Ad ID)', finalidade: 'Utilizado por serviços de terceiros (como AdMob, Google Analytics, etc.) para personalizar anúncios e analisar o desempenho de campanhas de marketing, conforme declarado no Google Play Console.', categoria: 'publicidade' },
+            { tipo: 'Dados do Dispositivo', finalidade: 'Informações como o tipo de dispositivo, sistema operacional, provedor de internet, fuso horário e identificadores anônimos de dispositivo para fins de segurança e otimização.', categoria: 'otimizacao' },
+            { tipo: 'Dados de Logs', finalidade: 'Detalhes sobre como você usa o App (ex: telas visitadas, tempo gasto no App, falhas e erros de sistema/ANR) para diagnosticar problemas e melhorar o App.', categoria: 'diagnostico' }
+        ];
+
+        const servicosTerceiros = [
+            { nome: 'Google Play Services', tipo: 'Dados de identificação do dispositivo.', finalidade: 'Funcionalidade básica, segurança e verificação de licença do App.', icone: '🔒' },
+            { nome: 'Google AdMob (ou outra Rede de Anúncios)', tipo: 'ID de Publicidade e dados de geolocalização aproximada.', finalidade: 'Exibição de anúncios relevantes e medição de desempenho de anúncios.', icone: '📢' },
+            { nome: 'Firebase Analytics/Crashlytics', tipo: 'Dados anônimos de uso do App e do dispositivo.', finalidade: 'Entender o comportamento do usuário, relatar e corrigir falhas do App.', icone: '📊' }
+        ];
+
+        const baseLegalDireitos = [
+            {
+                titulo: 'Base Legal: Fundamentos do Processamento (Seção 2)',
+                conteudo: 'Processamos seus dados pessoais apenas com base nos seguintes fundamentos legais: <ul><li>**Interesse Legítimo:** Para operar, manter e melhorar nosso App, corrigir erros e garantir sua segurança.</li><li>**Cumprimento de Obrigações Legais:** Para atender a requisitos regulatórios, como a Lei Geral de Proteção de Dados (LGPD).</li><li>**Consentimento:** Solicitamos seu consentimento explícito (ex: para uso do ID de Publicidade).</li></ul>',
+                icone: '⚖️'
+            },
+            {
+                titulo: 'Seus Direitos como Titular dos Dados (Seção 4)',
+                conteudo: 'De acordo com a LGPD e regulamentações aplicáveis, você tem o direito de: <ul><li>**Acessar** os dados que mantemos sobre você.</li><li>Solicitar a **correção** de dados incompletos ou imprecisos.</li><li>Solicitar a **anonimização, bloqueio ou eliminação** de dados desnecessários.</li><li>**Revogar o seu consentimento** a qualquer momento (ex: nas configurações do seu dispositivo, desativando a personalização de anúncios).</li></ul>',
+                icone: '✅'
+            },
+            {
+                titulo: 'Retenção e Segurança dos Dados (Seção 3)',
+                conteudo: 'Retemos seus Dados Pessoais apenas pelo tempo necessário para as finalidades estabelecidas. Utilizamos medidas de segurança razoáveis. Lembre-se que os dados coletados por terceiros são regidos pelas políticas de retenção desses provedores (ex: Google).',
+                icone: '🛡️'
+            }
+        ];
+
+        let coletaChartInstance = null;
+
+        function renderizarTabela(filtro) {
+            const tbody = document.getElementById('tabelaDados');
+            tbody.innerHTML = '';
+            
+            const dadosFiltrados = dadosColetados.filter(dado => filtro === 'todos' || dado.categoria === filtro);
+
+            if (dadosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="px-3 py-4 text-sm text-gray-500 text-center">Nenhum dado encontrado para o filtro selecionado.</td></tr>';
+                return;
+            }
+
+            dadosFiltrados.forEach(dado => {
+                const tr = document.createElement('tr');
+                tr.classList.add('hover:bg-gray-100');
+                tr.innerHTML = `
+                    <td class="px-3 py-3 whitespace-normal text-sm font-medium text-[#1B4E8C]">${dado.tipo}</td>
+                    <td class="px-3 py-3 whitespace-normal text-sm text-gray-600">${dado.finalidade}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarGrafico() {
+            const ctx = document.getElementById('coletaChart').getContext('2d');
+
+            const labels = ['Publicidade e Marketing', 'Segurança e Otimização', 'Diagnóstico e Melhoria'];
+            const data = [1, 1, 1]; 
+
+            if (coletaChartInstance) {
+                coletaChartInstance.destroy();
+            }
+
+            coletaChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#1B4E8C', '#A3E635', '#4B5563'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'sans-serif'
+                                },
+                                color: '#4B5563'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += (context.raw * 100 / 3).toFixed(0) + '%';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderizarCardsTerceiros() {
+            const container = document.getElementById('cardsTerceiros');
+            container.innerHTML = '';
+
+            servicosTerceiros.forEach(servico => {
+                const card = document.createElement('div');
+                card.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200', 'transition', 'duration-300', 'hover:shadow-xl', 'hover:border-[#1B4E8C]');
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="text-2xl">${servico.icone}</span>
+                        <h5 class="font-bold text-[#1B4E8C]">${servico.nome}</h5>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">Tipo de Dado: ${servico.tipo}</p>
+                    <p class="text-sm text-gray-700 font-medium">Finalidade: ${servico.finalidade}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderizarAcordeao() {
+            const container = document.getElementById('acordeao');
+            container.innerHTML = '';
+
+            baseLegalDireitos.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'overflow-hidden');
+                div.innerHTML = `
+                    <button class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-colors duration-200 hover:bg-gray-100" data-index="${index}">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">${item.icone}</span>
+                            <span class="font-semibold text-xl text-[#1B4E8C]">${item.titulo}</span>
+                        </div>
+                        <span class="text-2xl transform transition-transform duration-200" data-arrow="${index}">+</span>
+                    </button>
+                    <div id="content-${index}" class="p-4 sm:p-6 bg-gray-50 hidden border-t border-gray-200">
+                        <div class="text-gray-700 leading-relaxed">${item.conteudo}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            container.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = button.getAttribute('data-index');
+                    const content = document.getElementById(`content-${index}`);
+                    const arrow = document.querySelector(`[data-arrow="${index}"]`);
+                    
+                    const isHidden = content.classList.contains('hidden');
+
+                    if (isHidden) {
+                        content.classList.remove('hidden');
+                        arrow.textContent = '−';
+                        arrow.classList.add('rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        arrow.textContent = '+';
+                        arrow.classList.remove('rotate-180');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarTabela('todos');
+            renderizarGrafico();
+            renderizarCardsTerceiros();
+            renderizarAcordeao();
+
+            document.getElementById('filtroDado').addEventListener('change', (e) => {
+                renderizarTabela(e.target.value);
+            });
+        });
+    </script>
+</body>
+</html>
