@@ -1,351 +1,367 @@
-<!-- Chosen Palette: Neutra-Calma (Fundo: Branco/Bege Suave #F7F5F0; Primária: Azul Marinho #1B4E8C; Acento: Verde Menta Suave #A3E635) -->
-<!-- Application Structure Plan: Dashboard temático (Arquitetura da Informação). A estrutura foi escolhida para evitar a leitura linear de um documento legal. O usuário é guiado por três seções principais interativas: 1. Mapa de Dados Coletados (Visão Geral da Seção 1): Apresenta o tipo de dado, finalidade e quem coleta, de forma visual e filtrável. 2. Framework Legal (Visão Geral da Seção 2): Explica a base legal (LGPD) e os direitos do usuário com toggles interativos. 3. O Ecossistema de Terceiros (Visão Geral da Seção 1b): Detalha os serviços de terceiros e suas funções. Esta abordagem permite ao usuário "explodir" o texto da política em componentes interativos, focando no que é mais relevante (quais dados são meus?). -->
-<!-- Visualization & Content Choices:
-1. Dados Coletados:
-   - Report Info: Tabela da Seção 1a (Dados Automáticos).
-   - Goal: Informar e Organizar.
-   - Viz/Presentation Method: Tabela Interativa e Donut Chart (Chart.js) para mostrar a proporção de coleta (Implícito: Uso vs. Logs vs. Publicidade).
-   - Interaction: Filtro (Dropdown) para selecionar o Tipo de Dado.
-   - Justification: Tabela facilita a comparação e o Donut Chart oferece uma visão rápida do foco da coleta.
-   - Library/Method: Chart.js, Vanilla JS para manipulação da tabela e do filtro.
-2. Base Legal:
-   - Report Info: Seção 2 (Base Legal) e Seção 4 (Direitos).
-   - Goal: Informar e Organizar.
-   - Viz/Presentation Method: Painéis Expansíveis (Acordeão) com ícones.
-   - Interaction: Click para expandir/recolher detalhes legais.
-   - Justification: Reduz a carga cognitiva, mostrando o resumo do texto legal apenas quando o usuário deseja o detalhe.
-   - Library/Method: Vanilla JS.
-3. Terceiros:
-   - Report Info: Tabela da Seção 1b (Terceiros).
-   - Goal: Informar e Organizar.
-   - Viz/Presentation Method: Cards de Serviço com texto contextual.
-   - Interaction: Click/Hover para realçar a finalidade do serviço.
-   - Justification: Mais visual que uma tabela para destacar as entidades externas.
-   - Library/Method: Vanilla JS, Tailwind.
-CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transparência de Dados: Stake Smart EV Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <style>
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 400px;
-            }
-        }
-        .text-clip-fade {
-            position: relative;
-            max-height: 4.5em; /* 3 lines of text */
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .text-clip-fade.expanded {
-            max-height: 500px; /* arbitrary large value */
-        }
-        .text-clip-fade::after {
-            content: '...';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(to right, rgba(247, 245, 240, 0), #F7F5F0 50%);
-            padding-left: 10px;
-            pointer-events: none;
-        }
-        .text-clip-fade.expanded::after {
-            content: none;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Política de Privacidade — Smart Stake</title>
+<meta name="description" content="Política de Privacidade do Smart Stake — calculadora de EV e gestão de banca. Transparência total sobre os dados que coletamos e como usamos, em conformidade com a LGPD." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'media',
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0f172a',
+          brand: '#1B4E8C',
+          mint: '#10b981',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-feature-settings: "cv11", "ss01"; }
+  .anchor { scroll-margin-top: 90px; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .chev { transform: rotate(180deg); }
+  .chev { transition: transform .2s ease; }
+</style>
 </head>
-<body class="bg-[#F7F5F0] min-h-screen text-[#1B4E8C] font-sans">
-    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased">
 
-        <!-- CABEÇALHO E VISÃO GERAL -->
-        <header class="text-center mb-12">
-            <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1B4E8C] mb-2">Transparência de Dados</h1>
-            <h2 class="text-xl sm:text-2xl font-semibold text-gray-600 mb-4">Política de Privacidade Interativa – Stake Smart EV Calculator</h2>
-            <p class="text-sm text-gray-500">Última atualização: 23 de Outubro de 2025 | Operado por RL Products and Services</p>
-        </header>
-
-        <!-- INTRODUÇÃO E ARQUITETURA DA INFORMAÇÃO -->
-        <section class="bg-white p-6 sm:p-8 rounded-xl shadow-lg mb-12">
-            <h3 class="text-2xl font-bold mb-4 border-b-2 border-[#A3E635] pb-2">O Que Você Precisa Saber</h3>
-            <p class="text-gray-700 leading-relaxed">Esta aplicação interativa traduz os termos legais da Política de Privacidade do *Stake Smart EV Calculator* em um formato simples e acessível. Nossa prioridade é a transparência sobre como o App coleta e utiliza informações para fins de publicidade e melhoria do serviço. Você pode explorar a coleta de dados, o ecossistema de terceiros e seus direitos legais nas seções abaixo.</p>
-        </section>
-
-        <!-- SEÇÃO 1: MAPEAMENTO DE DADOS COLETADOS (Análise da Seção 1a e 1c) -->
-        <section id="dados-coletados" class="mb-12">
-            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">1. Mapa de Dados Coletados e Propósito</h3>
-            <p class="text-gray-700 mb-8">Esta seção detalha as informações que são coletadas automaticamente pelo App (Seção 1.a) e confirma que o App **NÃO** coleta dados de identificação direta (Seção 1.c), como seu nome ou e-mail, protegendo sua privacidade.</p>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- VISUALIZAÇÃO: Gráfico de Proporção de Coleta -->
-                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
-                    <h4 class="font-semibold text-lg mb-4 text-[#1B4E8C]">Foco da Coleta (Proporção Implícita)</h4>
-                    <div class="chart-container">
-                        <canvas id="coletaChart"></canvas>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-4 text-center">Gráfico estimativo do foco da coleta de dados automáticos, com base nas categorias descritas na política.</p>
-                </div>
-
-                <!-- TABELA INTERATIVA DE DADOS -->
-                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-                    <h4 class="font-semibold text-lg mb-4 text-[#1B4E8C]">Detalhes dos Dados Coletados Automaticamente</h4>
-                    <div class="mb-4 flex items-center space-x-4">
-                        <label for="filtroDado" class="text-sm font-medium text-gray-700">Filtrar por Finalidade:</label>
-                        <select id="filtroDado" class="mt-1 block w-full sm:w-auto p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#A3E635] focus:border-[#A3E635] bg-gray-50">
-                            <option value="todos">Mostrar Todos</option>
-                            <option value="publicidade">Publicidade e Marketing</option>
-                            <option value="otimizacao">Segurança e Otimização</option>
-                            <option value="diagnostico">Diagnóstico e Melhoria</option>
-                        </select>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Dado</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Finalidade Principal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaDados" class="bg-white divide-y divide-gray-200">
-                                <!-- Conteúdo inserido via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SEÇÃO 2: O ECÓSSISTEMA DE TERCEIROS (Análise da Seção 1b) -->
-        <section id="terceiros" class="mb-12">
-            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">2. Serviços de Terceiros Envolvidos</h3>
-            <p class="text-gray-700 mb-8">O App utiliza serviços de terceiros, essenciais para a funcionalidade (Google Play Services) ou para monetização e qualidade (AdMob, Firebase). Estes serviços têm suas próprias políticas de privacidade e são responsáveis pela gestão desses dados.</p>
-
-            <div id="cardsTerceiros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Cards inseridos via JS -->
-            </div>
-        </section>
-
-        <!-- SEÇÃO 3: DIREITOS E BASE LEGAL (Análise da Seção 2 e 4) -->
-        <section id="base-legal" class="mb-12">
-            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">3. Seus Direitos e Fundamentos Legais</h3>
-            <p class="text-gray-700 mb-8">Esta seção explica o fundamento legal (LGPD) que permite o processamento dos dados e detalha seus direitos como titular dos dados, promovendo o entendimento e o controle sobre suas informações.</p>
-
-            <div id="acordeao" class="space-y-4">
-                <!-- Painéis Expansíveis (Acordeão) para LGPD e Direitos -->
-            </div>
-        </section>
-
-        <!-- SEÇÃO 4: INFORMAÇÕES GERAIS E CONTATO (Seção 5 e 6) -->
-        <section id="contato" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-            <h3 class="text-3xl font-bold text-[#1B4E8C] mb-6">Informações Gerais e Contato</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h4 class="font-semibold text-lg mb-2 text-[#1B4E8C]">Privacidade de Crianças (Seção 5)</h4>
-                    <p class="text-gray-700">Nosso Serviço **não se destina a menores de 13 anos**. Não coletamos intencionalmente informações de identificação pessoal de crianças abaixo desta idade.</p>
-                </div>
-                <div>
-                    <h4 class="font-semibold text-lg mb-2 text-[#1B4E8C]">Fale Conosco (Seção 6)</h4>
-                    <p class="text-gray-700 mb-2">Para exercer seus direitos (Seção 4), tirar dúvidas ou solicitar informações sobre esta política, utilize o e-mail de contato:</p>
-                    <p class="text-lg font-bold text-[#A3E635] break-all">📧 buscadores999@gmail.com</p>
-                    <p class="text-sm text-gray-500 mt-2">Responsável: RL Products and Services</p>
-                </div>
-            </div>
-        </section>
-
+  <!-- Top bar -->
+  <header class="sticky top-0 z-30 backdrop-blur bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-mint flex items-center justify-center shadow-sm">
+          <span class="text-white font-black text-lg">S</span>
+        </div>
+        <div class="leading-tight">
+          <p class="font-black text-slate-900 dark:text-white text-sm">Smart Stake</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Política de Privacidade</p>
+        </div>
+      </div>
+      <a href="#contato" class="text-xs font-bold px-3 py-2 rounded-lg bg-brand text-white hover:bg-brand/90 transition-colors">Contato</a>
     </div>
+  </header>
 
-    <script>
-        const dadosColetados = [
-            { tipo: 'Identificador de Publicidade (Ad ID)', finalidade: 'Utilizado por serviços de terceiros (como AdMob, Google Analytics, etc.) para personalizar anúncios e analisar o desempenho de campanhas de marketing, conforme declarado no Google Play Console.', categoria: 'publicidade' },
-            { tipo: 'Dados do Dispositivo', finalidade: 'Informações como o tipo de dispositivo, sistema operacional, provedor de internet, fuso horário e identificadores anônimos de dispositivo para fins de segurança e otimização.', categoria: 'otimizacao' },
-            { tipo: 'Dados de Logs', finalidade: 'Detalhes sobre como você usa o App (ex: telas visitadas, tempo gasto no App, falhas e erros de sistema/ANR) para diagnosticar problemas e melhorar o App.', categoria: 'diagnostico' }
-        ];
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
 
-        const servicosTerceiros = [
-            { nome: 'Google Play Services', tipo: 'Dados de identificação do dispositivo.', finalidade: 'Funcionalidade básica, segurança e verificação de licença do App.', icone: '🔒' },
-            { nome: 'Google AdMob (ou outra Rede de Anúncios)', tipo: 'ID de Publicidade e dados de geolocalização aproximada.', finalidade: 'Exibição de anúncios relevantes e medição de desempenho de anúncios.', icone: '📢' },
-            { nome: 'Firebase Analytics/Crashlytics', tipo: 'Dados anônimos de uso do App e do dispositivo.', finalidade: 'Entender o comportamento do usuário, relatar e corrigir falhas do App.', icone: '📊' }
-        ];
+    <!-- Hero -->
+    <section class="mb-10">
+      <p class="inline-block text-[11px] font-bold uppercase tracking-wider text-mint bg-mint/10 border border-mint/30 rounded-full px-3 py-1 mb-4">Transparência de dados</p>
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-3">
+        Política de Privacidade
+      </h1>
+      <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+        Esta política explica, de forma clara, quais dados o aplicativo <strong>Smart Stake</strong>
+        (calculadora de EV e gestão de banca) coleta, por que coleta, com quem compartilha e quais
+        são os seus direitos — em conformidade com a <strong>Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018)</strong>.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+        <span>Última atualização: <strong class="text-slate-700 dark:text-slate-300">Agosto de 2026</strong></span>
+        <span>Operado por: <strong class="text-slate-700 dark:text-slate-300">RL Products and Services</strong></span>
+      </div>
+    </section>
 
-        const baseLegalDireitos = [
-            {
-                titulo: 'Base Legal: Fundamentos do Processamento (Seção 2)',
-                conteudo: 'Processamos seus dados pessoais apenas com base nos seguintes fundamentos legais: <ul><li>**Interesse Legítimo:** Para operar, manter e melhorar nosso App, corrigir erros e garantir sua segurança.</li><li>**Cumprimento de Obrigações Legais:** Para atender a requisitos regulatórios, como a Lei Geral de Proteção de Dados (LGPD).</li><li>**Consentimento:** Solicitamos seu consentimento explícito (ex: para uso do ID de Publicidade).</li></ul>',
-                icone: '⚖️'
-            },
-            {
-                titulo: 'Seus Direitos como Titular dos Dados (Seção 4)',
-                conteudo: 'De acordo com a LGPD e regulamentações aplicáveis, você tem o direito de: <ul><li>**Acessar** os dados que mantemos sobre você.</li><li>Solicitar a **correção** de dados incompletos ou imprecisos.</li><li>Solicitar a **anonimização, bloqueio ou eliminação** de dados desnecessários.</li><li>**Revogar o seu consentimento** a qualquer momento (ex: nas configurações do seu dispositivo, desativando a personalização de anúncios).</li></ul>',
-                icone: '✅'
-            },
-            {
-                titulo: 'Retenção e Segurança dos Dados (Seção 3)',
-                conteudo: 'Retemos seus Dados Pessoais apenas pelo tempo necessário para as finalidades estabelecidas. Utilizamos medidas de segurança razoáveis. Lembre-se que os dados coletados por terceiros são regidos pelas políticas de retenção desses provedores (ex: Google).',
-                icone: '🛡️'
-            }
-        ];
+    <!-- TL;DR -->
+    <section class="mb-12 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 shadow-sm">
+      <h2 class="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <span>⚡</span> Resumo em 30 segundos
+      </h2>
+      <ul class="space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
+        <li class="flex gap-2.5"><span class="text-mint font-black shrink-0">✓</span> <span>O Smart Stake é uma <strong>ferramenta de análise e gestão</strong>. Não somos uma casa de apostas e não processamos apostas.</span></li>
+        <li class="flex gap-2.5"><span class="text-mint font-black shrink-0">✓</span> <span>Você pode usar a calculadora <strong>sem criar conta</strong> — nesse caso, seus dados ficam só no seu aparelho.</span></li>
+        <li class="flex gap-2.5"><span class="text-mint font-black shrink-0">✓</span> <span>Se você <strong>criar uma conta</strong>, coletamos seu e-mail e sincronizamos seus registros na nuvem para backup.</span></li>
+        <li class="flex gap-2.5"><span class="text-mint font-black shrink-0">✓</span> <span>Você pode <strong>excluir sua conta e todos os dados</strong> a qualquer momento, direto no app.</span></li>
+        <li class="flex gap-2.5"><span class="text-amber-500 font-black shrink-0">!</span> <span>Uso restrito a <strong>maiores de 18 anos</strong>, conforme a Lei nº 14.790/2023.</span></li>
+      </ul>
+    </section>
 
-        let coletaChartInstance = null;
+    <!-- Índice -->
+    <nav class="mb-12 grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+      <a href="#dados" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">1. Dados que coletamos</a>
+      <a href="#uso" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">2. Como usamos</a>
+      <a href="#terceiros" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">3. Com quem compartilhamos</a>
+      <a href="#ocr" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">4. Imagens e IA</a>
+      <a href="#direitos" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">5. Seus direitos</a>
+      <a href="#seguranca" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">6. Segurança</a>
+      <a href="#idade" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">7. Idade & jogo responsável</a>
+      <a href="#alteracoes" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">8. Alterações</a>
+      <a href="#contato" class="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2.5 hover:border-brand hover:bg-brand/5 transition-colors font-semibold">9. Contato</a>
+    </nav>
 
-        function renderizarTabela(filtro) {
-            const tbody = document.getElementById('tabelaDados');
-            tbody.innerHTML = '';
-            
-            const dadosFiltrados = dadosColetados.filter(dado => filtro === 'todos' || dado.categoria === filtro);
+    <!-- 1. Dados -->
+    <section id="dados" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">1. Quais dados coletamos</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+        A coleta depende de como você usa o app. Sem conta, quase tudo fica local no seu aparelho.
+        Com conta, sincronizamos parte dos dados para dar backup e habilitar o ecossistema de analistas.
+      </p>
 
-            if (dadosFiltrados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="2" class="px-3 py-4 text-sm text-gray-500 text-center">Nenhum dado encontrado para o filtro selecionado.</td></tr>';
-                return;
-            }
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <table class="min-w-full text-sm bg-white dark:bg-slate-900">
+          <thead class="bg-slate-100 dark:bg-slate-800/70 text-left">
+            <tr>
+              <th class="px-4 py-3 font-black text-slate-700 dark:text-slate-200">Categoria</th>
+              <th class="px-4 py-3 font-black text-slate-700 dark:text-slate-200">Exemplos</th>
+              <th class="px-4 py-3 font-black text-slate-700 dark:text-slate-200">Quando</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Conta e identificação</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">E-mail, senha (armazenada de forma criptografada), nome de exibição e foto de perfil (opcional)</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Ao criar conta</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Registros de uso do app</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Apostas registradas, cálculos de EV, banca, preferências, times e jogos que você acompanha</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Local; sincronizado se você tiver conta</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Conteúdo de analista (tipster)</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Tips publicadas, seguidores, avaliações e denúncias — visíveis conforme o recurso</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Se você usa recursos sociais</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Imagens enviadas</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Prints de bilhetes que você escolhe enviar para leitura automática (OCR) — ver seção 4</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Só quando você anexa uma imagem</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Notificações</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Identificador de push (token do dispositivo) para enviar alertas de jogos e tips</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Se você ativa notificações</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Dados técnicos e de uso</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Modelo do dispositivo, sistema operacional, telas visitadas, eventos de uso, relatórios de erro/falha</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Durante o uso (se telemetria ativa)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Assinaturas e compras</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Status da assinatura e identificadores de compra (o pagamento é processado pela Google Play — não vemos os dados do seu cartão)</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Se você assina um plano</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-bold text-brand dark:text-mint">Publicidade</td>
+              <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Identificador de publicidade do Android para exibir anúncios (versão gratuita)</td>
+              <td class="px-4 py-3 text-slate-500 dark:text-slate-500">Se houver anúncios ativos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-500 mt-3">
+        Não coletamos CPF, dados bancários, nem realizamos apostas em seu nome. Não vendemos seus dados pessoais.
+      </p>
+    </section>
 
-            dadosFiltrados.forEach(dado => {
-                const tr = document.createElement('tr');
-                tr.classList.add('hover:bg-gray-100');
-                tr.innerHTML = `
-                    <td class="px-3 py-3 whitespace-normal text-sm font-medium text-[#1B4E8C]">${dado.tipo}</td>
-                    <td class="px-3 py-3 whitespace-normal text-sm text-gray-600">${dado.finalidade}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    <!-- 2. Uso -->
+    <section id="uso" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">2. Como e por que usamos seus dados</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">Usamos os dados apenas para as finalidades abaixo, cada uma amparada por uma base legal da LGPD:</p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <p class="font-bold text-slate-900 dark:text-white mb-1">Fornecer o serviço</p>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Autenticar login, salvar seus registros, sincronizar backup e habilitar os recursos que você usa.</p>
+          <p class="text-[11px] font-bold text-mint mt-2 uppercase tracking-wide">Base legal: execução de contrato</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <p class="font-bold text-slate-900 dark:text-white mb-1">Melhorar e corrigir</p>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Entender o uso, diagnosticar falhas e aprimorar a experiência.</p>
+          <p class="text-[11px] font-bold text-mint mt-2 uppercase tracking-wide">Base legal: legítimo interesse</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <p class="font-bold text-slate-900 dark:text-white mb-1">Notificações e anúncios</p>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Enviar alertas de jogos/tips e exibir publicidade na versão gratuita.</p>
+          <p class="text-[11px] font-bold text-mint mt-2 uppercase tracking-wide">Base legal: consentimento</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <p class="font-bold text-slate-900 dark:text-white mb-1">Segurança e conformidade</p>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Prevenir fraude e abuso, e cumprir obrigações legais (ex.: restrição de idade).</p>
+          <p class="text-[11px] font-bold text-mint mt-2 uppercase tracking-wide">Base legal: obrigação legal / legítimo interesse</p>
+        </div>
+      </div>
+    </section>
 
-        function renderizarGrafico() {
-            const ctx = document.getElementById('coletaChart').getContext('2d');
+    <!-- 3. Terceiros -->
+    <section id="terceiros" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">3. Com quem compartilhamos</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+        Usamos provedores de tecnologia (operadores de dados) para funcionar. Cada um trata apenas os dados
+        necessários à sua função e possui sua própria política de privacidade. Não vendemos seus dados.
+      </p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">🗄️</span><p class="font-bold text-slate-900 dark:text-white">Supabase</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Autenticação (login por e-mail), banco de dados e backup na nuvem.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">🤖</span><p class="font-bold text-slate-900 dark:text-white">Anthropic (Claude)</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Leitura automática (OCR) das imagens de bilhete que você opta por enviar. Ver seção 4.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">🔔</span><p class="font-bold text-slate-900 dark:text-white">Firebase Cloud Messaging (Google)</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Envio de notificações push (alertas de jogos e tips).</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">💳</span><p class="font-bold text-slate-900 dark:text-white">Google Play Billing & RevenueCat</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Processamento e gestão de assinaturas. Os dados de pagamento são tratados pela Google.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">📊</span><p class="font-bold text-slate-900 dark:text-white">PostHog</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Análise de uso do app (analytics), para entender e melhorar recursos.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">🐛</span><p class="font-bold text-slate-900 dark:text-white">Sentry</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Relatório de erros e falhas para diagnóstico técnico.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">⚽</span><p class="font-bold text-slate-900 dark:text-white">API-Football</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Fornece dados de jogos (placar, escalações, odds). Não recebe seus dados pessoais.</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">📢</span><p class="font-bold text-slate-900 dark:text-white">Google AdMob</p></div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">Exibição de anúncios na versão gratuita, usando o identificador de publicidade do Android.</p>
+        </div>
+      </div>
+    </section>
 
-            const labels = ['Publicidade e Marketing', 'Segurança e Otimização', 'Diagnóstico e Melhoria'];
-            const data = [1, 1, 1]; 
+    <!-- 4. OCR / IA -->
+    <section id="ocr" class="anchor mb-12">
+      <div class="rounded-2xl border border-brand/30 bg-brand/5 dark:bg-brand/10 p-6 sm:p-7">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-2"><span>🤖</span> 4. Imagens de bilhete e inteligência artificial</h2>
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
+          Para agilizar o preenchimento, o app permite que você <strong>envie um print do seu bilhete</strong> de aposta.
+          Quando você faz isso, a imagem é enviada ao provedor de IA <strong>Anthropic (Claude)</strong> para extrair
+          automaticamente informações como odd, mercado, times e data.
+        </p>
+        <ul class="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
+          <li class="flex gap-2"><span class="text-mint">✓</span> O envio só acontece <strong>quando você escolhe anexar uma imagem</strong> — nunca automaticamente.</li>
+          <li class="flex gap-2"><span class="text-mint">✓</span> A imagem é usada apenas para a leitura dos dados daquele bilhete.</li>
+          <li class="flex gap-2"><span class="text-mint">✓</span> Recomendamos não enviar imagens com informações pessoais sensíveis visíveis.</li>
+        </ul>
+      </div>
+    </section>
 
-            if (coletaChartInstance) {
-                coletaChartInstance.destroy();
-            }
+    <!-- 5. Direitos -->
+    <section id="direitos" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">5. Seus direitos (LGPD)</h2>
+      <p class="text-slate-600 dark:text-slate-400 mb-6 text-sm leading-relaxed">Como titular dos dados, você pode exercer os seguintes direitos a qualquer momento:</p>
 
-            coletaChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['#1B4E8C', '#A3E635', '#4B5563'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    family: 'sans-serif'
-                                },
-                                color: '#4B5563'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += (context.raw * 100 / 3).toFixed(0) + '%';
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+      <div class="space-y-3">
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <summary class="flex items-center justify-between p-4 font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-2"><span>🗑️</span> Excluir sua conta e dados</span>
+            <span class="chev text-slate-400">▾</span>
+          </summary>
+          <div class="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400">
+            Você pode excluir permanentemente sua conta e os dados associados diretamente no aplicativo, em
+            <strong>Banca → Privacidade → Excluir minha conta</strong>. A exclusão é irreversível. Assinaturas ativas
+            devem ser canceladas separadamente na Google Play.
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <summary class="flex items-center justify-between p-4 font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-2"><span>👁️</span> Acessar e corrigir</span>
+            <span class="chev text-slate-400">▾</span>
+          </summary>
+          <div class="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400">
+            Você pode acessar e editar seus dados de perfil no app, ou solicitar acesso/correção pelo e-mail de contato.
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <summary class="flex items-center justify-between p-4 font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-2"><span>🚫</span> Revogar consentimento</span>
+            <span class="chev text-slate-400">▾</span>
+          </summary>
+          <div class="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400">
+            Você pode desativar a telemetria (analytics) e as notificações nas configurações do app, e a personalização
+            de anúncios nas configurações do seu dispositivo Android.
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <summary class="flex items-center justify-between p-4 font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-2"><span>📦</span> Portabilidade e demais direitos</span>
+            <span class="chev text-slate-400">▾</span>
+          </summary>
+          <div class="px-4 pb-4 text-sm text-slate-600 dark:text-slate-400">
+            Você tem direito à portabilidade, à anonimização, à informação sobre compartilhamento e à oposição ao
+            tratamento, nos termos da LGPD. Basta solicitar pelo e-mail de contato.
+          </div>
+        </details>
+      </div>
+    </section>
 
-        function renderizarCardsTerceiros() {
-            const container = document.getElementById('cardsTerceiros');
-            container.innerHTML = '';
+    <!-- 6. Segurança -->
+    <section id="seguranca" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">6. Segurança e retenção</h2>
+      <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+        Adotamos medidas técnicas e organizacionais razoáveis para proteger seus dados, incluindo criptografia em
+        trânsito e controle de acesso. Retemos os dados apenas pelo tempo necessário às finalidades desta política ou
+        conforme exigido por lei. Ao excluir sua conta, os dados associados são removidos dos nossos sistemas; cópias
+        em provedores terceiros seguem as políticas de retenção deles. Nenhum sistema é 100% seguro, mas trabalhamos
+        continuamente para proteger suas informações.
+      </p>
+    </section>
 
-            servicosTerceiros.forEach(servico => {
-                const card = document.createElement('div');
-                card.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200', 'transition', 'duration-300', 'hover:shadow-xl', 'hover:border-[#1B4E8C]');
-                card.innerHTML = `
-                    <div class="flex items-center space-x-3 mb-2">
-                        <span class="text-2xl">${servico.icone}</span>
-                        <h5 class="font-bold text-[#1B4E8C]">${servico.nome}</h5>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-2">Tipo de Dado: ${servico.tipo}</p>
-                    <p class="text-sm text-gray-700 font-medium">Finalidade: ${servico.finalidade}</p>
-                `;
-                container.appendChild(card);
-            });
-        }
+    <!-- 7. Idade -->
+    <section id="idade" class="anchor mb-12">
+      <div class="rounded-2xl border border-amber-400/40 bg-amber-50 dark:bg-amber-500/10 p-6 sm:p-7">
+        <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-2"><span>🔞</span> 7. Restrição de idade e jogo responsável</h2>
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
+          O Smart Stake é destinado <strong>exclusivamente a pessoas maiores de 18 anos</strong>, em conformidade com a
+          <strong>Lei nº 14.790/2023</strong>. Não coletamos intencionalmente dados de menores de 18 anos. O app exige
+          confirmação de idade no primeiro acesso e oferece ferramenta de autoexclusão.
+        </p>
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          Apostas envolvem risco financeiro real. Se precisar de ajuda:
+          <strong>CVV — 188</strong> (ligação gratuita) ou
+          <a href="https://jogadoresanonimos.com.br" class="text-brand dark:text-mint font-bold underline">Jogadores Anônimos</a>.
+        </p>
+      </div>
+    </section>
 
-        function renderizarAcordeao() {
-            const container = document.getElementById('acordeao');
-            container.innerHTML = '';
+    <!-- 8. Alterações -->
+    <section id="alteracoes" class="anchor mb-12">
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-2">8. Alterações nesta política</h2>
+      <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+        Podemos atualizar esta política periodicamente. Mudanças relevantes serão comunicadas no app ou por outros
+        meios adequados. A data da última atualização sempre constará no topo desta página. O uso contínuo do app após
+        alterações significa concordância com a política revisada.
+      </p>
+    </section>
 
-            baseLegalDireitos.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.classList.add('bg-white', 'rounded-xl', 'shadow-md', 'overflow-hidden');
-                div.innerHTML = `
-                    <button class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-colors duration-200 hover:bg-gray-100" data-index="${index}">
-                        <div class="flex items-center space-x-3">
-                            <span class="text-2xl">${item.icone}</span>
-                            <span class="font-semibold text-xl text-[#1B4E8C]">${item.titulo}</span>
-                        </div>
-                        <span class="text-2xl transform transition-transform duration-200" data-arrow="${index}">+</span>
-                    </button>
-                    <div id="content-${index}" class="p-4 sm:p-6 bg-gray-50 hidden border-t border-gray-200">
-                        <div class="text-gray-700 leading-relaxed">${item.conteudo}</div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+    <!-- 9. Contato -->
+    <section id="contato" class="anchor mb-4">
+      <div class="rounded-2xl bg-slate-900 dark:bg-slate-800 text-white p-6 sm:p-8">
+        <h2 class="text-2xl font-black mb-2">9. Fale conosco</h2>
+        <p class="text-slate-300 text-sm leading-relaxed mb-4">
+          Para exercer seus direitos, tirar dúvidas ou solicitar informações sobre esta política, entre em contato:
+        </p>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <a href="mailto:buscadores999@gmail.com" class="inline-flex items-center gap-2 bg-mint text-slate-900 font-black px-4 py-2.5 rounded-xl hover:bg-mint/90 transition-colors">
+            📧 buscadores999@gmail.com
+          </a>
+          <p class="text-sm text-slate-400">Responsável: <strong class="text-white">RL Products and Services</strong></p>
+        </div>
+      </div>
+    </section>
 
-            container.querySelectorAll('button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const index = button.getAttribute('data-index');
-                    const content = document.getElementById(`content-${index}`);
-                    const arrow = document.querySelector(`[data-arrow="${index}"]`);
-                    
-                    const isHidden = content.classList.contains('hidden');
+    <footer class="text-center text-xs text-slate-400 dark:text-slate-600 mt-10">
+      © <span id="ano"></span> RL Products and Services · Smart Stake. Ferramenta de análise e gestão — não é uma casa de apostas.
+    </footer>
+  </main>
 
-                    if (isHidden) {
-                        content.classList.remove('hidden');
-                        arrow.textContent = '−';
-                        arrow.classList.add('rotate-180');
-                    } else {
-                        content.classList.add('hidden');
-                        arrow.textContent = '+';
-                        arrow.classList.remove('rotate-180');
-                    }
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderizarTabela('todos');
-            renderizarGrafico();
-            renderizarCardsTerceiros();
-            renderizarAcordeao();
-
-            document.getElementById('filtroDado').addEventListener('change', (e) => {
-                renderizarTabela(e.target.value);
-            });
-        });
-    </script>
+  <script>
+    document.getElementById('ano').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
